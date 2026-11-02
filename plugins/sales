@@ -4,9 +4,16 @@
 #
 # Written by AI, and only tested to a limited extent.
 
+use File::Basename qw(dirname);
+
 HELP "sales <product>" => "Show sales of a product per month";
 
 our $script = "$FindBin::RealBin/contrib/product-sales.pl";
+
+# Listed with a full path in the plugins file, e.g. from a checkout of
+# revbank-sales: the script is next to the plugin.
+$script = dirname(dirname __FILE__) . "/contrib/product-sales.pl"
+    if __FILE__ =~ m[^/];
 
 # The older form of a command with an argument, which still works.
 sub command :Tab(sales) ($self, $cart, $command, @) {
@@ -21,7 +28,8 @@ sub sales($self, $cart, $product, @) {
     # The script writes to the terminal directly, for colors. The IBM 3151 has
     # 21 lines under GNU screen, and the prompt needs one.
     STDOUT->flush;
-    system $^X, $script, "--exact", "--lines", 20, "--", $product;
+    system $^X, "-I", "$FindBin::RealBin/lib", $script,
+        "--exact", "--lines", 20, "--", $product;
 
     return ACCEPT;
 }

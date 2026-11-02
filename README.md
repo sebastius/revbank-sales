@@ -42,6 +42,10 @@ echo sales >> ~/.revbank/plugins
 
 Then type `restart` in RevBank.
 
+Instead of copying, the plugin can also be listed with its full path in the
+`plugins` file, e.g. `/home/you/revbank-sales/plugins/sales`. It then uses the
+command line tool next to it.
+
 ## Usage
 
 In RevBank:
@@ -77,6 +81,20 @@ like `log.2025`.
   Descriptions work with older versions too.
 - Products can only be told apart from other entries in logs from RevBank 3.4
   (2022) or newer.
+
+## Testing
+
+`dev/gen-demo.pl` makes a new data directory with a fictional year of history:
+30 products, 50 users, and a few hundred sales, deposits, reimbursements and
+undos. It runs a real RevBank with a fake clock, so the log is like a real one,
+rotated into `log.YYYY` files.
+
+```
+perl dev/gen-demo.pl ~/revbank ~/revbank-test
+cd ~/revbank && ./revbank --datadir ~/revbank-test
+```
+
+The first argument is a RevBank checkout. The plugin is loaded from this repo.
 
 ## License
 
