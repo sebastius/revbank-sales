@@ -1,0 +1,27 @@
+#!perl
+
+# Shows the sales of a product per month, using contrib/product-sales.pl.
+#
+# Written by AI, and only tested to a limited extent.
+
+HELP "sales <product>" => "Show sales of a product per month";
+
+our $script = "$FindBin::RealBin/contrib/product-sales.pl";
+
+# The older form of a command with an argument, which still works.
+sub command :Tab(sales) ($self, $cart, $command, @) {
+    return NEXT if $command ne 'sales';
+
+    return "Product ID or exact description", \&sales;
+}
+
+sub sales($self, $cart, $product, @) {
+    return REJECT, "$script not found." if not -e $script;
+
+    # The script writes to the terminal directly, for colors. The IBM 3151 has
+    # 21 lines under GNU screen, and the prompt needs one.
+    STDOUT->flush;
+    system $^X, $script, "--exact", "--lines", 20, "--", $product;
+
+    return ACCEPT;
+}
