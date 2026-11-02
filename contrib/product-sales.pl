@@ -63,7 +63,8 @@ matched against product descriptions.
 =item --exact, -e
 
 Only match descriptions that are exactly the same as an argument, ignoring
-case and accents. Product ids still work.
+case and accents. In an argument, C<*> matches any text and C<?> any
+single character, so C<"*pizza*"> finds all pizzas. Product ids still work.
 
 =item --list, -l
 
@@ -182,17 +183,26 @@ if ($regex) {
 } elsif (@ARGV) {
 	my %wanted;
 	my %exact;  # folded descriptions
+	my @globs;  # exact, but with * and ?
 	my @words;  # per argument, all of them must occur
 	my $products;
 	for my $arg (@ARGV) {
 		# Only needed for ids, and needs the datadir.
-		$products //= do {
+		$products //= eval {
 			require RevBank::Products;
 			RevBank::Products::read_products();
+		} // do {
+			warn "Can't read the products, so product ids won't work: $@";
+			+{};
 		};
 
 		if (my $product = $products->{$arg}) {
 			$wanted{ $product->{description} } = 1;
+		} elsif ($exact and $arg =~ /[*?]/) {
+			my $re = quotemeta fold($arg);
+			$re =~ s/\\\*/.*/g;
+			$re =~ s/\\\?/./g;
+			push @globs, qr/^$re\z/s;
 		} elsif ($exact) {
 			$exact{ fold($arg) } = 1;
 		} else {
@@ -203,6 +213,7 @@ if ($regex) {
 		return 1 if $wanted{$desc};
 		my $folded = fold $desc;
 		return 1 if $exact{$folded};
+		return 1 if grep { $folded =~ $_ } @globs;
 		for my $words (@words) {
 			return 1 if not grep { index($folded, $_) < 0 } @$words;
 		}

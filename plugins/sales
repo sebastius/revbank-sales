@@ -19,7 +19,7 @@ $script = dirname(dirname __FILE__) . "/contrib/product-sales.pl"
 sub command :Tab(sales) ($self, $cart, $command, @) {
     return NEXT if $command ne 'sales';
 
-    return "Product ID or exact description", \&sales;
+    return "Product ID or exact description (* for any text)", \&sales;
 }
 
 sub sales($self, $cart, $product, @) {
