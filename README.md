@@ -84,6 +84,15 @@ like `log.2025`.
 
 ## Testing
 
+The automated tests make transactions with a real RevBank, at chosen times,
+and check the output of the tool and the plugin. They need a RevBank checkout
+next to this repo, or in `REVBANK_DIR`:
+
+```
+prove
+REVBANK_DIR=~/src/revbank prove
+```
+
 `dev/gen-demo.pl` makes a new data directory with a fictional year of history:
 30 products, 50 users, and a few hundred sales, deposits, reimbursements and
 undos. It runs a real RevBank with a fake clock, so the log is like a real one,
